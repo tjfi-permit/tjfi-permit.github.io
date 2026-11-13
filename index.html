@@ -462,7 +462,7 @@ function renderTop(){
  const a=(h,k,t)=>`<a href="${h}" class="${seg===k?'active':''}" ${seg===k?'aria-current="page"':''}>${t}</a>`;
  const nav=a('#/','','Beranda')+a('#/ajukan','ajukan','Ajukan Izin')+a('#/status','status','Cek Status')+
   `<a href="${PORTAL_URL}">Portal SCS</a>`+(u?a('#/app','app','Dasbor'):'<a class="only-m" href="#/login">Login Staf</a>')+(u?'<button class="navbtn only-m" data-act="logout">Keluar</button>':'');
- const act=u?`<div class="hd-user"><b>${esc(u.nama)}</b>${u.role==='HSE'?'HSE':'Dept. '+esc(u.dept)}</div><button class="hbtn hbtn-secondary hbtn-sm" data-act="logout">Keluar</button>`
+ const act=u?`<div class="hd-user"><b>${esc(u.nama)}</b>${u.role==='HSE'?'HSE':'Dept. '+esc(u.dept)+(u.plant?' · '+esc(u.plant):'')}</div><button class="hbtn hbtn-secondary hbtn-sm" data-act="logout">Keluar</button>`
   :`<a class="hbtn hbtn-primary hbtn-sm" href="#/login">${IC.user}Login Staf</a>`;
  top_.innerHTML=`<div class="container header-inner"><div class="brand-side"><a href="#/" aria-label="PT TJForge Indonesia - beranda"><img class="company-logo" src="${LOGO}" alt="PT TJForge Indonesia"></a><div class="hd-divider" aria-hidden="true"></div>
   <a href="#/" class="scs-brand" aria-label="SCS Work Permit"><img class="scs-mark" src="${MARK}" alt=""><div class="scs-wording">SAFETY CONTROL<br>SYSTEM · WORK PERMIT</div></a></div>
@@ -550,7 +550,7 @@ function stepGeneral(){const g=wiz.general;return `<h3 style="margin-bottom:12px
  ${wi('general.kontraktor','Nama kontraktor')}${wi('general.alamat','Alamat kantor')}
  ${wi('general.judul','Judul kerja','text','wide')}
  ${wi('general.lokasi','Lokasi kerja (area / bangunan)')}
- <label class="f">Plant tempat pekerjaan<select id="wiz-plant" data-ctx="wiz" data-bind="general.plant"><option value="">Pilih plant</option>${PLANTS.filter(d=>d!=='Plant 1 dan Plant 2'||g.plant===d).map(d=>`<option ${g.plant===d?'selected':''}>${d}</option>`).join('')}</select></label>
+ <label class="f">Plant tempat pekerjaan<select id="wiz-plant" data-ctx="wiz" data-bind="general.plant"><option value="">Pilih plant</option>${PLANTS.map(d=>`<option ${g.plant===d?'selected':''}>${d}</option>`).join('')}</select></label>
  <label class="f">Dept. pemberi kerja<select id="wiz-dept" data-ctx="wiz" data-bind="general.dept">${deptSelectHtml(g.plant,g.dept)}</select></label>
  ${wi('general.picTjfi','PIC PT TJFI')}${wi('general.telpTjfi','Telepon PIC TJFI','tel')}
  ${wi('general.picKon','PIC kontraktor')}${wi('general.telpKon','Telepon PIC kontraktor','tel')}
@@ -687,7 +687,7 @@ function pageLogin(){
 }
 
 /* ===== Aplikasi staf ===== */
-let fl={q:'',plant:'',kon:'',jenis:'',dept:'',dari:'',sampai:''},filter='all',accForm={nama:'',user:'',role:'DEPT',dept:''},accShow=null,pwErr='',pwForm={old:'',n1:'',n2:''};
+let fl={q:'',plant:'',kon:'',jenis:'',dept:'',dari:'',sampai:''},filter='all',accForm={nama:'',user:'',role:'DEPT',plant:'',dept:''},accShow=null,pwErr='',pwForm={old:'',n1:'',n2:''};
 async function pageApp(parts){
  if(!S.token||!S.user){location.hash='#/login';return}
  if(S.user.mustChange)return pagePwForced();
@@ -748,7 +748,7 @@ async function pageList(){
   const match=p=>filter==='all'||(filter==='wait'?p.status==='Diketahui':p.eff===filter);
   const list=base.filter(match);
   ACT.listcsv=()=>exportPermitCsv(list);
-  app.innerHTML=`${appTabs('permit')}<div class="who"><div><h2>${isH?'Persetujuan permit (HSE)':'Permit departemen '+esc(S.user.dept)}</h2><p>${isH?'Setujui, tolak, atau tutup permit kontraktor.':'Ketahui permit yang diajukan kontraktor untuk pekerjaan di departemen Anda.'}</p></div><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">${isH?'':'<span class="lock">Akun ini hanya mengakses Work Permit.</span>'}<button class="btn sm" data-act="reload">Muat ulang</button></span></div>
+  app.innerHTML=`${appTabs('permit')}<div class="who"><div><h2>${isH?'Persetujuan permit (HSE)':'Permit departemen '+esc(S.user.dept)+(S.user.plant?' · '+esc(S.user.plant):'')}</h2><p>${isH?'Setujui, tolak, atau tutup permit kontraktor.':'Ketahui permit yang diajukan kontraktor untuk pekerjaan di departemen Anda.'}</p></div><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">${isH?'':'<span class="lock">Akun ini hanya mengakses Work Permit.</span>'}<button class="btn sm" data-act="reload">Muat ulang</button></span></div>
   ${isH?filterBar(list.length):''}
   <div class="quickbar"><a class="btn sm primary" href="#/app/monitor">Lihat Monitoring &amp; Grafik</a>${isH?'<button class="btn sm" data-act="listcsv">Ekspor CSV hasil filter</button>':''}</div>
   <div class="stats">${stats.map(([k,l,n])=>`<button class="stat" data-act="filter" data-k="${k}" aria-pressed="${filter===k}"><b>${n}</b><span>${l}</span></button>`).join('')}</div>
@@ -966,13 +966,14 @@ async function pageAkun(){
  const refresh=async()=>{const [a,b]=await Promise.all([api('users_list'),api('log_list')]);users.length=0;users.push(...a.users);logs.length=0;logs.push(...b.log)};
  ACT.addacc=async()=>{
   const f=accForm;err='';
-  try{const r=await api('user_create',{nama:f.nama,username:f.user,role:f.role,dept:f.dept});accShow={user:r.username,pass:r.tempPassword,aksi:'dibuat'};accForm={nama:'',user:'',role:'DEPT',dept:''};await refresh()}catch(e){err=e.message}
+  try{const r=await api('user_create',{nama:f.nama,username:f.user,role:f.role,plant:f.plant,dept:f.dept});accShow={user:r.username,pass:r.tempPassword,aksi:'dibuat'};accForm={nama:'',user:'',role:'DEPT',plant:'',dept:''};await refresh()}catch(e){err=e.message}
   current();window.scrollTo(0,0);
  };
  ACT.aa=async b=>{
   const k=b.dataset.k,user=b.dataset.id;
   try{
    if(k==='reset'){const r=await api('user_reset',{username:user});accShow={user:r.username,pass:r.tempPassword,aksi:'direset'};window.scrollTo(0,0)}
+   else if(k==='p1'||k==='p2'){await api('user_plant',{username:user,plant:k==='p1'?'Plant 1':'Plant 2'});toast('Plant akun diatur.')}
    else{await api('user_active',{username:user,aktif:k==='on'});toast(k==='on'?'Akun diaktifkan.':'Akun dinonaktifkan.')}
    await refresh();
   }catch(e){toast(e.message)}
@@ -990,10 +991,10 @@ async function pageAkun(){
    <label class="f">Nama pengguna<input id="af-nama" data-ctx="acc" data-bind="nama" value="${esc(f.nama)}"></label>
    <label class="f">Username<input id="af-user" data-ctx="acc" data-bind="user" autocapitalize="none" value="${esc(f.user)}" placeholder="contoh: produksi.02"></label>
    <label class="f">Peran<select id="af-role" data-ctx="acc" data-bind="role" data-rr="1"><option value="DEPT" ${f.role==='DEPT'?'selected':''}>Dept. Pemberi Kerja</option><option value="HSE" ${f.role==='HSE'?'selected':''}>HSE</option></select></label>
-   ${f.role==='DEPT'?`<label class="f">Departemen<select id="af-dept" data-ctx="acc" data-bind="dept"><option value="">Pilih departemen</option>${DEPTS.map(d=>`<option ${f.dept===d?'selected':''}>${d}</option>`).join('')}</select></label>`:''}
-  </div><p class="note" style="margin:10px 0 0">${f.role==='DEPT'?'Hak akses server saat ini menggunakan nama departemen. Untuk departemen yang sama di dua plant, pembatasan plant secara aman memerlukan penyesuaian backend; jangan mengandalkan filter frontend.':'Akun HSE bisa menyetujui permit dan mengelola semua akun.'}</p>
+   ${f.role==='DEPT'?`<label class="f">Plant<select id="af-plant" data-ctx="acc" data-bind="plant" data-rr="1"><option value="">Pilih plant</option>${['Plant 1','Plant 2'].map(p=>`<option ${f.plant===p?'selected':''}>${p}</option>`).join('')}</select></label><label class="f">Departemen<select id="af-dept" data-ctx="acc" data-bind="dept">${deptSelectHtml(f.plant,f.dept)}</select></label>`:''}
+  </div><p class="note" style="margin:10px 0 0">${f.role==='DEPT'?'Akun departemen terikat pada satu plant: hanya melihat permit departemennya di plant tersebut, ditambah permit lintas plant. Departemen yang sama di dua plant memerlukan dua akun.':'Akun HSE bisa menyetujui permit dan mengelola semua akun.'}</p>
   <div class="actions"><button class="btn primary" data-act="addacc">Buat akun</button></div><div class="err" role="alert">${esc(err)}</div></div>
-  <div class="panel"><h3 style="margin-bottom:10px">Daftar akun</h3><div class="tablewrap"><table style="min-width:760px"><thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Departemen</th><th>Login terakhir</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>${users.map(a=>`<tr><td>${esc(a.nama)}</td><td style="font-family:var(--mono)">${esc(a.username)}</td><td>${a.role==='HSE'?'HSE':'Dept. Pemberi Kerja'}</td><td>${esc(a.dept)||'-'}</td><td>${a.lastLogin?fmtDT(a.lastLogin):'Belum pernah'}</td><td><span class="pill ${a.aktif?'s-Disetujui':'s-Dikembalikan'}">${a.aktif?'Aktif':'Nonaktif'}</span></td><td><div class="actions" style="margin:0"><button class="btn sm" data-act="aa" data-k="reset" data-id="${esc(a.username)}">Reset password</button>${a.aktif?`<button class="btn sm bad" data-act="aa" data-k="off" data-id="${esc(a.username)}">Nonaktifkan</button>`:`<button class="btn sm ok" data-act="aa" data-k="on" data-id="${esc(a.username)}">Aktifkan</button>`}</div></td></tr>`).join('')}</tbody></table></div></div>
+  <div class="panel"><h3 style="margin-bottom:10px">Daftar akun</h3><div class="tablewrap"><table style="min-width:760px"><thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Departemen</th><th>Plant</th><th>Login terakhir</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>${users.map(a=>`<tr><td>${esc(a.nama)}</td><td style="font-family:var(--mono)">${esc(a.username)}</td><td>${a.role==='HSE'?'HSE':'Dept. Pemberi Kerja'}</td><td>${esc(a.dept)||'-'}</td><td>${a.role==='DEPT'?(a.plant?esc(a.plant):'<span class="pill s-Dikembalikan">belum diatur</span>'):'-'}</td><td>${a.lastLogin?fmtDT(a.lastLogin):'Belum pernah'}</td><td><span class="pill ${a.aktif?'s-Disetujui':'s-Dikembalikan'}">${a.aktif?'Aktif':'Nonaktif'}</span></td><td><div class="actions" style="margin:0"><button class="btn sm" data-act="aa" data-k="reset" data-id="${esc(a.username)}">Reset password</button>${a.role==='DEPT'&&!a.plant?`<button class="btn sm" data-act="aa" data-k="p1" data-id="${esc(a.username)}">Set Plant 1</button><button class="btn sm" data-act="aa" data-k="p2" data-id="${esc(a.username)}">Set Plant 2</button>`:''}${a.aktif?`<button class="btn sm bad" data-act="aa" data-k="off" data-id="${esc(a.username)}">Nonaktifkan</button>`:`<button class="btn sm ok" data-act="aa" data-k="on" data-id="${esc(a.username)}">Aktifkan</button>`}</div></td></tr>`).join('')}</tbody></table></div></div>
   <div class="panel"><h3 style="margin-bottom:10px">Riwayat sistem (200 terakhir)</h3><div class="tablewrap" style="max-height:340px;overflow:auto"><table style="min-width:560px"><thead><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th>Detail</th></tr></thead><tbody>${logs.map(x=>`<tr><td>${fmtDT(x.waktu)}</td><td>${esc(x.user)}</td><td>${esc(x.aksi)}</td><td>${esc(x.detail)}</td></tr>`).join('')}</tbody></table></div></div>`;
  });
 }
@@ -1032,7 +1033,7 @@ function pagePwForced(){
 }
 function pageProfil(){
  pwErr='';const u=S.user,isH=u.role==='HSE';
- draw(()=>{app.innerHTML=`${appTabs('profil')}<div class="who"><div><h2>Profil</h2><p>${esc(u.nama)} · ${isH?'HSE':'Dept. '+esc(u.dept)} · ${esc(u.username)}</p></div></div>
+ draw(()=>{app.innerHTML=`${appTabs('profil')}<div class="who"><div><h2>Profil</h2><p>${esc(u.nama)} · ${isH?'HSE':'Dept. '+esc(u.dept)+(u.plant?' · '+esc(u.plant):'')} · ${esc(u.username)}</p></div></div>
  <div class="panel"><h3 style="margin-bottom:10px">Ganti password</h3>${pwFormHtml(false)}</div>
  ${isH?`<div class="panel"><h3 style="margin-bottom:4px">Tanda tangan HSE</h3><p class="note" style="margin:0 0 10px">Tanda tangan ini dicetak di lembar izin bersama stempel persetujuan saat Anda menyetujui permit. ${u.hasTtd?'Tanda tangan sudah tersimpan; menggambar ulang akan menggantinya.':'Belum ada tanda tangan tersimpan.'} Permit yang sudah disetujui tidak berubah.</p><canvas id="pad" class="pad" width="360" height="120" aria-label="Kotak tanda tangan"></canvas><div class="actions"><button class="btn" data-act="padclear">Hapus coretan</button><button class="btn primary" data-act="padsave">Simpan tanda tangan</button>${u.hasTtd?'<button class="btn bad" data-act="padremove">Hapus tanda tangan tersimpan</button>':''}</div><div id="padmsg" class="note" style="margin-top:8px"></div></div>`:''}`;
   if(isH)initPad();
@@ -1109,7 +1110,8 @@ app.addEventListener('input',e=>{
    if(t.dataset.bind==='general.plant'){const g=wiz.general;if(!departmentsForPlant(g.plant).includes(g.dept))g.dept='';rerender()}
    saveDraft();
   }
- if(t.dataset.bind==='role'&&t.dataset.ctx==='acc'&&t.value==='HSE')accForm.dept='';
+ if(t.dataset.bind==='role'&&t.dataset.ctx==='acc'&&t.value==='HSE'){accForm.dept='';accForm.plant=''}
+ if(t.dataset.bind==='plant'&&t.dataset.ctx==='acc'&&!departmentsForPlant(t.value).includes(accForm.dept))accForm.dept='';
  if(t.dataset.rr)rerender();
 });
 app.addEventListener('change',e=>{
