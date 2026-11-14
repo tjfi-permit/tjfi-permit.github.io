@@ -477,6 +477,7 @@ function draw(fn){current=fn;fn()}
 function loading(){app.innerHTML='<p class="note" style="margin-top:24px">Memuat...</p>'}
 function showError(e,back){app.innerHTML=`<div class="panel" style="margin-top:18px"><h3>Tidak dapat memuat halaman</h3><p class="note">${esc(e.message||e)}</p><div class="actions"><a class="btn" href="${back||'#/'}">Kembali</a></div></div>`}
 const IC={
+ book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>',
  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>',
  out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>',
  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
@@ -489,7 +490,7 @@ function renderTop(){
  const seg=location.hash.replace(/^#\/?/,'').split('/')[0]||'';
  const a=(h,k,t)=>`<a href="${h}" class="${seg===k?'active':''}" ${seg===k?'aria-current="page"':''}>${t}</a>`;
  const nav=a('#/','','Beranda')+a('#/ajukan','ajukan','Ajukan Izin')+a('#/status','status','Cek Status')+
-  `<a href="${PORTAL_URL}">Portal SCS</a>`+(u?a('#/app','app','Dasbor'):'<a class="only-m" href="#/login">Login Staf</a>')+(u?'<button class="navbtn only-m" data-act="logout">Keluar</button>':'');
+  `<a href="panduan.pdf" target="_blank" rel="noopener">Panduan</a>`+`<a href="${PORTAL_URL}">Portal SCS</a>`+(u?a('#/app','app','Dasbor'):'<a class="only-m" href="#/login">Login Staf</a>')+(u?'<button class="navbtn only-m" data-act="logout">Keluar</button>':'');
  const act=u?`<div class="hd-user"><b>${esc(u.nama)}</b>${u.role==='HSE'?'HSE':'Dept. '+esc(u.dept)+(u.plant?' · '+esc(u.plant):'')}</div><button class="hbtn hbtn-secondary hbtn-sm" data-act="logout">Keluar</button>`
   :`<a class="hbtn hbtn-primary hbtn-sm" href="#/login">${IC.user}Login Staf</a>`;
  top_.innerHTML=`<div class="container header-inner"><div class="brand-side"><a href="#/" aria-label="PT TJForge Indonesia - beranda"><img class="company-logo" src="${LOGO}" alt="PT TJForge Indonesia"></a><div class="hd-divider" aria-hidden="true"></div>
@@ -525,7 +526,7 @@ function home(){
    <div class="lp-eyebrow">PT <span class="tj">TJForge</span> Indonesia</div>
    <h1>SCS Work<br>Permit</h1><div class="lp-bar"></div>
    <p class="lp-lead">Sistem izin kerja untuk kontraktor: ajukan, pantau, dan unduh izin kerja secara tertib, tercatat, dan aman.</p>
-   <div class="lp-actions"><a class="hbtn hbtn-primary" href="#/ajukan">${IC.out}Ajukan Izin Kerja</a><a class="hbtn hbtn-secondary" href="#/status">${IC.search}Cek Status Permit</a></div>
+   <div class="lp-actions"><a class="hbtn hbtn-primary" href="#/ajukan">${IC.out}Ajukan Izin Kerja</a><a class="hbtn hbtn-secondary" href="#/status">${IC.search}Cek Status Permit</a><a class="hbtn hbtn-secondary" href="panduan.pdf" target="_blank" rel="noopener">${IC.book}Panduan Penggunaan</a></div>
    <div class="lp-proof">${IC.shield}<span>Tanpa login untuk kontraktor • Diketahui departemen • Disetujui HSE</span></div>
   </div>
   <div class="lp-visual" role="img" aria-label="Karyawan PT TJForge Indonesia"><div class="lp-frame"></div><div class="lp-photo"><img src="${HERO}" alt=""></div><div class="lp-badge">${IC.shield}Utamakan Keselamatan Kerja</div></div>
