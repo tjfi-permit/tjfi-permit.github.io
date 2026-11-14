@@ -354,6 +354,8 @@ body.busy #busyov{display:flex;animation:ldin .2s ease .45s both}
 @keyframes ldin{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.ld-ring::before,.ld-ring img,.ld-bar i,#busyov .sp{animation-duration:3s}}
 @media print{#splash,#busyov{display:none!important}}
+
+.k3box{max-height:52vh;overflow:auto;border:1px solid var(--line,#d5dae1);border-radius:10px;padding:12px 16px;background:#fff}.k3list{margin:0;padding-left:22px}.k3list>li{margin:0 0 10px}.k3list ul{margin:4px 0 0;padding-left:20px;list-style:disc}.k3ok{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border:2px solid var(--accent,#ff8200);border-radius:10px;cursor:pointer}.k3ok input{margin-top:3px;width:18px;height:18px;flex:none}@media print{.k3box{max-height:none;border:0}}
 </style>
 </head>
 <body>
@@ -503,6 +505,7 @@ async function route(){
  try{
   if(!parts.length)return await home();
   if(parts[0]==='ajukan')return await pageAjukan();
+  if(parts[0]==='peraturan')return pagePeraturan();
   if(parts[0]==='status')return await pageStatus(parts[1]);
   if(parts[0]==='lembar')return await pageLembarPublik(parts[1]);
   if(parts[0]==='login')return await pageLogin();
@@ -551,6 +554,32 @@ function home(){
 }
 /* ===== Kontraktor: pengajuan ===== */
 const newDraft=()=>({taReasons:{},general:{kontraktor:'',alamat:'',judul:'',lokasi:'',plant:'',dept:'',picTjfi:'',telpTjfi:'',picKon:'',telpKon:'',pengawasKon:'',telpPengawas:'',jumlah:'',mulai:addDays(1),selesai:addDays(1),keterangan:''},workers:[{nama:'',unit:'',idt:'',idn:''},{nama:'',unit:'',idt:'',idn:''},{nama:'',unit:'',idt:'',idn:''}],types:[],checks:{},apd:{},desc:{},jsea:[{tahap:'',pic:'',bahaya:'',kendali:'',lingk:'',kendaliLing:''}]});
+
+const K3_VER='2026-11';
+const K3RULES=[
+ ['Setiap kontraktor / sub kontraktor yang bekerja di area PT TJFI harus menyediakan staf sebagai project manager yang mengawasi aktivitas pekerjaan dan hal keselamatan.'],
+ ['Semua pekerja harus mendapat orientasi K3 sebelum mulai kerja. Orientasi diberikan oleh petugas safety kontraktor / sub kontraktor dan petugas safety PT TJFI, meliputi cara bekerja yang aman, cara memakai alat yang benar, dan peraturan K3 yang harus dipatuhi.'],
+ ['Setiap pekerja wajib memakai kartu pengenal dan seragam selama berada di area PT TJFI, serta membawa identitas pribadi (KTP / SIM / surat keterangan lain yang dapat dipertanggungjawabkan).'],
+ ['Data pribadi setiap pekerja dibuat oleh kontraktor / sub kontraktor dan disimpan dengan baik agar siap bila diperlukan.'],
+ ['Alat pelindung diri wajib digunakan oleh semua pekerja saat masuk dan berada di area PT TJFI, di antaranya:',['Safety helmet dan tali dagu.','Sepatu safety / sepatu kerja.','Sabuk pengaman / full body harness (bekerja di ketinggian, juga saat melintas di ketinggian).','Sarung tangan (sesuai kegunaan).','Kacamata pelindung (pekerja khusus).','Pelindung telinga (area bising).','Masker hidung (area yang memerlukan).']],
+ ['Setiap hari, sebelum pekerjaan dimulai, kontraktor memeriksa kondisi peralatan kerja. Alat kerja listrik (bor, gerinda), cable roll, trafo las, dan speed cutter harus memiliki grounding. Peralatan juga harus aman, misalnya:',['Benda yang berputar harus ada pelindung.','Tabung gas diletakkan tegak dan terikat.','Peralatan las dilengkapi flash back arrester.','Panel listrik sementara dilengkapi face plate cover.','Hydraulic tidak bocor.','Sling dalam keadaan baik dan memadai.','Scaffolding dalam keadaan baik, dan lain-lain.']],
+ ['Setiap pekerja mengikuti meeting pagi sebelum kerja dimulai, dipimpin staf safety kontraktor / sub kontraktor masing-masing, mencakup:',['Pengarahan tentang kewaspadaan terhadap bahaya di area proyek.','Kondisi kesehatan pekerja hari itu.','Pemeriksaan APD.','Pengarahan kerja secara umum.']],
+ ['Semua kontraktor / sub kontraktor menggunakan seragam selama berada di area PT TJFI.'],
+ ['Semua pekerja membersihkan dan merapikan area kerja 15 menit sebelum kerja selesai setiap hari. Sampah tidak boleh menumpuk dan harus ditempatkan di tempat yang aman, dipisahkan menurut jenisnya.'],
+ ['Dilarang membuang oli bekas, cairan kimia, dan barang tak dikenal ke saluran air, tanah, atau sembarang tempat. Jika terjadi, pekerja segera melapor kepada pimpinan proyek dan selanjutnya kepada perwakilan PT TJFI untuk meminta instruksi.'],
+ ['Melaksanakan program 5S:',['Seiri (Ringkas): pisahkan benda yang tidak diperlukan lalu singkirkan.','Seiton (Rapi): rapikan benda yang diperlukan agar siap pakai.','Seiso (Resik): bersihkan tempat kerja.','Seiketsu (Rawat): pelihara kondisi tempat kerja dengan standar tinggi.','Shitsuke (Rajin): lakukan secara spontan tanpa perlu diingatkan.']],
+ ['Semua kontraktor / sub kontraktor mengajukan izin kerja sebelum memulai pekerjaan. Setelah disetujui, izin kerja ditempel di area kerja. Pekerjaan tanpa izin dapat dihentikan petugas safety PT TJFI setiap saat. Izin kerja meliputi:',['Izin kerja panas (hot work permit).','Izin kerja di ketinggian.','Izin penggalian tanah.','Izin listrik bertegangan.','Izin penebangan pohon.']],
+ ['Setiap kontraktor / sub kontraktor wajib menyediakan kotak obat minimal satu buah, dengan isi yang selalu dikontrol.'],
+ ['Hal-hal yang dilarang di PT TJFI:',['Merokok di sembarang tempat.','Berjudi, minum alkohol, atau narkoba.','Berkelahi.','Memakai sandal.','Membawa senjata tajam atau api.','Membawa keluar barang milik PT TJFI tanpa izin.','Memakai peralatan / material milik PT TJFI tanpa izin (termasuk listrik dan air).']],
+ ['Sebelum bekerja, kontraktor menyiapkan di lokasi kerja: APAR minimal dua buah, kipas angin, ember berisi air, dan karung basah.'],
+ ['Area kerja harus diproteksi untuk mencegah bahaya merembet keluar / masuk lokasi pekerjaan.'],
+ ['Bila bekerja di ketinggian, pekerja menggunakan scaffolding yang kondisinya baik.'],
+ ['Pengawasan keselamatan dilakukan sesering mungkin oleh petugas safety kontraktor / sub kontraktor, memperbaiki segera setiap pelanggaran, menindak pekerja yang terus mengabaikan peraturan, dan menjamin tidak ada kondisi yang sangat membahayakan selama proyek berlangsung.'],
+ ['Dari awal hingga selesai pekerjaan, pekerja tetap mengutamakan keselamatan dan kesehatan kerja, baik diri sendiri maupun orang lain.'],
+ ['Pengawas safety PT TJFI berhak menghentikan pekerjaan proyek bila terjadi penyimpangan yang melanggar peraturan dan persyaratan K3 di atas.']
+];
+const k3Html=()=>`<ol class="k3list">${K3RULES.map(r=>`<li>${esc(r[0])}${r[1]?`<ul>${r[1].map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</li>`).join('')}</ol>`;
+function pagePeraturan(){draw(()=>{app.innerHTML=`<div class="who"><div><h2>Peraturan LK3 Kontraktor</h2><p>PT TJ Forge Indonesia. Berlaku untuk kontraktor / sub kontraktor yang bekerja di area PT TJ Forge Indonesia.</p></div></div><div class="panel">${k3Html()}<div class="actions" style="margin-top:12px"><a class="btn primary" href="#/ajukan">Ajukan izin kerja</a><button class="btn" onclick="window.print()">Cetak</button></div></div>`})}
 let wiz=null,wstep=0,wizErr='',wizDone=null,draftT;
 const STEPS=['Data kerja','Pekerja','Jenis izin','JSEA','Kirim'];
 function loadDraft(){
@@ -563,6 +592,7 @@ function pageAjukan(){
  wizDone=null;wizErr='';
  draw(()=>{
   if(wizDone){app.innerHTML=`<div class="who"><div><h2>Pengajuan izin kerja kontraktor</h2></div></div><div class="success"><div>Permit terkirim. Simpan nomor ini untuk mengecek status:</div><div class="big">${esc(wizDone)}</div>${wizKode?`<div style="margin-top:12px">Kode revisi: <b class="big" style="font-size:22px;letter-spacing:.12em">${esc(wizKode.slice(0,4))}-${esc(wizKode.slice(4))}</b></div><div class="note" style="color:inherit;margin-top:4px">Simpan kode ini bersama nomor permit. Jika permit dikembalikan oleh departemen, kode ini dipakai untuk memperbaiki data tanpa mengisi dari awal. Kode juga tersimpan otomatis di browser ini.</div>`:''}<div class="note" style="color:inherit;margin-top:6px">Status berikutnya: menunggu Dept. ${esc(wizDone_dept)} mengetahui, lalu HSE menyetujui. Pekerjaan baru boleh dimulai setelah status Disetujui dan sesuai tanggal izin.</div></div><div class="actions"><a class="btn primary" href="#/status/${encodeURIComponent(wizDone)}">Lihat status</a><button class="btn" data-act="again">Ajukan permit lain</button></div>`;return}
+  if(wiz.k3!==K3_VER){app.innerHTML=`<div class="who"><div><h2>Peraturan K3 Kontraktor</h2><p>Baca seluruh peraturan di bawah ini sebelum mengajukan izin kerja. Seluruh pekerja kontraktor wajib mematuhinya selama berada di area PT TJ Forge Indonesia.</p></div></div>${wiz.revisi?`<div class="note" style="margin-bottom:10px">Revisi dari <b>${esc(wiz.revisi.id)}</b>: persetujuan peraturan perlu dikonfirmasi ulang.</div>`:''}<div class="panel"><div class="k3box" tabindex="0" aria-label="Peraturan K3 Kontraktor">${k3Html()}</div><label class="k3ok"><input type="checkbox" id="k3chk"><span>Saya telah membaca dan menyetujui Peraturan LK3 Kontraktor PT TJ Forge Indonesia, serta akan memastikan seluruh pekerja mematuhinya.</span></label><div class="actions" style="margin-top:10px"><button class="btn primary" id="k3go" data-act="k3ok" disabled>Setuju dan lanjut mengisi</button></div></div>`;return}
   const st=`<div class="steps">${STEPS.map((s,i)=>`<span class="${i===wstep?'on':i<wstep?'done':''}">${i+1}. ${s}</span>`).join('')}</div>`;
   const body=[stepGeneral,stepWorkers,stepTypes,stepJsea,stepReview][wstep]();
   const nav=`<div class="actions">${wstep>0?'<button class="btn" data-act="wprev">Kembali</button>':''}${wstep<4?'<button class="btn primary" data-act="wnext">Lanjut</button>':'<button class="btn primary" data-act="wsend">Kirim permit</button>'}</div><div class="err" role="alert">${esc(wizErr)}</div>`;
@@ -608,7 +638,7 @@ const JSEA_EX=[
  {tahap:'Penutupan: bersihkan area dan serahkan kembali',pic:'Pengawas K3 kontraktor',bahaya:'Sisa bara, benda tajam tertinggal',kendali:'Periksa area minimal 30 menit setelah las, kumpulkan semua peralatan dan sisa material, lapor ke PIC TJFI',lingk:'Limbah sisa pekerjaan',kendaliLing:'Buang ke tempat penampungan limbah sesuai ketentuan TJFI'}];
 function stepJsea(){return `<h3>JSEA (Job Safety Environment Analysis)</h3><p class="note" style="margin:4px 0 12px">Uraikan tiap tahapan pekerjaan, bahayanya, dan cara pengendaliannya. Tiga baris <b>Contoh</b> berlatar abu-abu hanya panduan (tidak ikut terkirim); isi baris di bawahnya sesuai pekerjaan Anda.</p>
  <div class="tablewrap"><table style="min-width:900px"><thead><tr><th>No</th><th>Tahapan pekerjaan</th><th>PIC</th><th>Bahaya</th><th>Pengendalian risiko</th><th>Aspek lingkungan</th><th>Pengendalian dampak</th></tr></thead><tbody>${JSEA_EX.map((r,i)=>`<tr class="jx"><td class="n">Contoh ${i+1}</td>${['tahap','pic','bahaya','kendali','lingk','kendaliLing'].map(k=>`<td>${esc(r[k])}</td>`).join('')}</tr>`).join('')}${wiz.jsea.map((r,i)=>`<tr><td class="n">${i+1}</td>${['tahap','pic','bahaya','kendali','lingk','kendaliLing'].map(k=>`<td><textarea class="cell" rows="2" placeholder="${esc(JSEA_EX[0][k])}" id="js-${i}-${k}" data-ctx="wiz" data-bind="jsea.${i}.${k}" aria-label="${k} baris ${i+1}">${esc(r[k])}</textarea></td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="actions"><button class="btn ghost" data-act="addj">Tambah tahapan</button></div>`}
-function stepReview(){const g=wiz.general;return `<h3 style="margin-bottom:12px">Periksa sebelum kirim</h3>${dl(g)}<p style="margin:14px 0 4px"><b>${wiz.workers.filter(w=>w.nama.trim()).length}</b> pekerja terdaftar, <b>${wiz.types.length}</b> jenis izin khusus: ${wiz.types.map(k=>`<span class="chip">${TYPES[k].nama}</span>`).join(' ')||'-'}, <b>${wiz.jsea.filter(r=>r.tahap.trim()).length}</b> tahapan JSEA.</p><p class="note">Dengan mengirim, kontraktor menyatakan data benar dan bersedia mematuhi Peraturan LK3 Kontraktor TJFI. Pilihan T/A memerlukan alasan yang akan dicatat bersama uraian pekerjaan. Pekerjaan hanya boleh dimulai setelah permit disetujui, masa berlaku aktif, serta kondisi lapangan dan pengendalian risiko diverifikasi.</p><div class="hp" aria-hidden="true"><label>Website<input id="hp" tabindex="-1" autocomplete="off"></label></div>`}
+function stepReview(){const g=wiz.general;return `<h3 style="margin-bottom:12px">Periksa sebelum kirim</h3>${dl(g)}<p style="margin:14px 0 4px"><b>${wiz.workers.filter(w=>w.nama.trim()).length}</b> pekerja terdaftar, <b>${wiz.types.length}</b> jenis izin khusus: ${wiz.types.map(k=>`<span class="chip">${TYPES[k].nama}</span>`).join(' ')||'-'}, <b>${wiz.jsea.filter(r=>r.tahap.trim()).length}</b> tahapan JSEA.</p><p class="note">Dengan mengirim, kontraktor menyatakan data benar dan telah menyetujui dan bersedia mematuhi Peraturan LK3 Kontraktor TJFI (<a href="#/peraturan" target="_blank" rel="noopener">baca kembali</a>). Pilihan T/A memerlukan alasan yang akan dicatat bersama uraian pekerjaan. Pekerjaan hanya boleh dimulai setelah permit disetujui, masa berlaku aktif, serta kondisi lapangan dan pengendalian risiko diverifikasi.</p><div class="hp" aria-hidden="true"><label>Website<input id="hp" tabindex="-1" autocomplete="off"></label></div>`}
 function dl(g){const r=[['Kontraktor',g.kontraktor],['Judul kerja',g.judul],['Plant',g.plant],['Lokasi',g.lokasi],['Dept. pemberi kerja',g.dept],['PIC TJFI',`${g.picTjfi||''} ${g.telpTjfi||''}`],['PIC kontraktor',`${g.picKon||''} ${g.telpKon||''}`],['Pengawas K3 kontraktor',`${g.pengawasKon||''} ${g.telpPengawas||''}`],['Jumlah pekerja',g.jumlah],['Periode',`${fmt(g.mulai)} s/d ${fmt(g.selesai)}`]];return `<dl class="dl">${r.map(([a,b])=>`<div><dt>${a}</dt><dd>${esc(String(b||'').trim())||'-'}</dd></div>`).join('')}</dl>`}
 function validate(){
  const g=wiz.general;
@@ -709,7 +739,7 @@ function sheetHtml(p){
   <h3>JSEA</h3>${js}
   <h3>Persetujuan</h3>
   <div class="sigs"><div class="sig"><div class="role">Mengetahui,<br>Dept. Pemberi Kerja (${esc(g.dept)})</div>${sd}</div><div class="sig"><div class="role">Menyetujui,<br>HSE PT TJ Forge Indonesia</div>${sh}</div></div>
-  <p class="sh-note" style="margin-top:10px">Lembar ini wajib ditempel di area kerja. Keaslian dan status terbaru dapat dicek dengan memindai QR di atas atau lewat menu Cek status dengan nomor permit di atas.</p>
+  <p class="sh-note" style="margin-top:10px"><b>Pemohon (kontraktor) telah membaca dan menyetujui Peraturan LK3 Kontraktor PT TJ Forge Indonesia</b>${p.k3At?` pada ${fmtDT(p.k3At)}`:''}.</p><p class="sh-note" style="margin-top:10px">Lembar ini wajib ditempel di area kerja. Keaslian dan status terbaru dapat dicek dengan memindai QR di atas atau lewat menu Cek status dengan nomor permit di atas.</p>
  </article>`;
 }
 
@@ -1102,6 +1132,7 @@ const ACT={
  setapi:e=>{const v=prompt('Alamat Web App Apps Script (berakhiran /exec):',ls.get('wp-api')||'');if(v!==null){v.trim()?ls.set('wp-api',v.trim()):ls.del('wp-api');toast('Alamat server disimpan.')}},
  again:()=>{wiz=newDraft();wstep=0;wizDone=null;wizErr='';ls.del('wp-draft');current()},
  wprev:()=>{wstep--;wizErr='';saveDraft();current();window.scrollTo(0,0)},
+ k3ok:()=>{const c=$('#k3chk');if(!c||!c.checked)return;wiz.k3=K3_VER;saveDraft();current();window.scrollTo(0,0)},
  wnext:()=>{const e=validate();if(e){wizErr=e;current();return}wizErr='';wstep++;saveDraft();current();window.scrollTo(0,0)},
  wsend:async()=>{
   if(sendingPermit)return;
@@ -1117,7 +1148,7 @@ const ACT={
   }
   sendingPermit=true;
   try{
-   const r=await api('submit',{general:g,workers:wiz.workers,types:wiz.types,checks:wiz.checks,apd:wiz.apd,desc,jsea:wiz.jsea,revisiDari:wiz.revisi?{id:wiz.revisi.id,kode:wiz.revisi.kode}:undefined,hp:($('#hp')||{}).value||''},false);
+   const r=await api('submit',{k3:wiz.k3,general:g,workers:wiz.workers,types:wiz.types,checks:wiz.checks,apd:wiz.apd,desc,jsea:wiz.jsea,revisiDari:wiz.revisi?{id:wiz.revisi.id,kode:wiz.revisi.kode}:undefined,hp:($('#hp')||{}).value||''},false);
    wizDone=r.id;wizKode=r.kode||'';if(r.kode)revStore.put(r.id,r.kode);wizDone_dept=g.dept;ls.del('wp-draft');wiz=null;wstep=0;window.scrollTo(0,0);current();
   }catch(e){wizErr=e.message;current()}finally{sendingPermit=false}
  },
@@ -1169,6 +1200,7 @@ app.addEventListener('input',e=>{
 });
 app.addEventListener('change',e=>{
  const t=e.target;
+ if(t.id==='k3chk'){const b=$('#k3go');if(b)b.disabled=!t.checked;return}
  if(t.id==='mon-plant'){monPlant=t.value;pageMonitoring();return}
  if(t.id==='mon-month'){monMonth=t.value;pageMonitoring();return}
  if(t.id==='mon-status'){monStatus=t.value;pageMonitoring();return}
