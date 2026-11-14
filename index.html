@@ -562,14 +562,15 @@ function pageAjukan(){
  if(!wiz)loadDraft();
  wizDone=null;wizErr='';
  draw(()=>{
-  if(wizDone){app.innerHTML=`<div class="who"><div><h2>Pengajuan izin kerja kontraktor</h2></div></div><div class="success"><div>Permit terkirim. Simpan nomor ini untuk mengecek status:</div><div class="big">${esc(wizDone)}</div><div class="note" style="color:inherit;margin-top:6px">Status berikutnya: menunggu Dept. ${esc(wizDone_dept)} mengetahui, lalu HSE menyetujui. Pekerjaan baru boleh dimulai setelah status Disetujui dan sesuai tanggal izin.</div></div><div class="actions"><a class="btn primary" href="#/status/${encodeURIComponent(wizDone)}">Lihat status</a><button class="btn" data-act="again">Ajukan permit lain</button></div>`;return}
+  if(wizDone){app.innerHTML=`<div class="who"><div><h2>Pengajuan izin kerja kontraktor</h2></div></div><div class="success"><div>Permit terkirim. Simpan nomor ini untuk mengecek status:</div><div class="big">${esc(wizDone)}</div>${wizKode?`<div style="margin-top:12px">Kode revisi: <b class="big" style="font-size:22px;letter-spacing:.12em">${esc(wizKode.slice(0,4))}-${esc(wizKode.slice(4))}</b></div><div class="note" style="color:inherit;margin-top:4px">Simpan kode ini bersama nomor permit. Jika permit dikembalikan oleh departemen, kode ini dipakai untuk memperbaiki data tanpa mengisi dari awal. Kode juga tersimpan otomatis di browser ini.</div>`:''}<div class="note" style="color:inherit;margin-top:6px">Status berikutnya: menunggu Dept. ${esc(wizDone_dept)} mengetahui, lalu HSE menyetujui. Pekerjaan baru boleh dimulai setelah status Disetujui dan sesuai tanggal izin.</div></div><div class="actions"><a class="btn primary" href="#/status/${encodeURIComponent(wizDone)}">Lihat status</a><button class="btn" data-act="again">Ajukan permit lain</button></div>`;return}
   const st=`<div class="steps">${STEPS.map((s,i)=>`<span class="${i===wstep?'on':i<wstep?'done':''}">${i+1}. ${s}</span>`).join('')}</div>`;
   const body=[stepGeneral,stepWorkers,stepTypes,stepJsea,stepReview][wstep]();
   const nav=`<div class="actions">${wstep>0?'<button class="btn" data-act="wprev">Kembali</button>':''}${wstep<4?'<button class="btn primary" data-act="wnext">Lanjut</button>':'<button class="btn primary" data-act="wsend">Kirim permit</button>'}</div><div class="err" role="alert">${esc(wizErr)}</div>`;
-  app.innerHTML=`<div class="who"><div><h2>Pengajuan izin kerja kontraktor</h2><p>Tanpa login. Isi data, lalu kirim untuk diketahui departemen dan disetujui HSE. Draf tersimpan <b>di browser perangkat ini</b> dan dapat memuat data identitas pekerja; gunakan perangkat pribadi atau hapus draf setelah selesai.</p></div></div>${st}<div class="panel">${body}${nav}<div class="actions" style="margin-top:6px"><button class="btn sm ghost" data-act="resetdraft">Hapus draf di perangkat ini</button></div></div>`;
+  app.innerHTML=`<div class="who"><div><h2>Pengajuan izin kerja kontraktor</h2><p>Tanpa login. Isi data, lalu kirim untuk diketahui departemen dan disetujui HSE. Draf tersimpan <b>di browser perangkat ini</b> dan dapat memuat data identitas pekerja; gunakan perangkat pribadi atau hapus draf setelah selesai.</p></div></div>${wiz.revisi?`<div class="panel" style="border:2px solid var(--accent);margin-bottom:12px"><b>Revisi dari ${esc(wiz.revisi.id)}</b><div class="note" style="margin-top:4px">${wiz.revisi.alasan?'Alasan pengembalian: '+esc(wiz.revisi.alasan)+'. ':''}Perbaiki data yang salah, periksa kembali setiap langkah, lalu kirim. Permit baru akan mendapat nomor baru, dan nomor identitas pekerja tetap terisi seperti pengajuan sebelumnya.</div></div>`:''}${st}<div class="panel">${body}${nav}<div class="actions" style="margin-top:6px"><button class="btn sm ghost" data-act="resetdraft">Hapus draf di perangkat ini</button></div></div>`;
  });
 }
-let wizDone_dept='';
+let wizDone_dept='',wizKode='';
+const revStore={get(){try{return JSON.parse(ls.get('wp-rev')||'{}')}catch(e){return{}}},put(id,k){const m=revStore.get();m[id]=k;ls.set('wp-rev',JSON.stringify(m))}};
 const bi=(ctx,path,label,type,cls,extra)=>`<label class="f ${cls||''}">${label}<input id="${ctx}-${path.replace(/\./g,'-')}" data-ctx="${ctx}" data-bind="${path}" type="${type||'text'}" ${extra||''} value="${esc(getPath(ctx==='wiz'?wiz:{},path))}"></label>`;
 const wi=(path,label,type,cls,extra)=>bi('wiz',path,label,type,cls,extra);
 function stepGeneral(){const g=wiz.general;return `<h3 style="margin-bottom:12px">Data kerja</h3><div class="grid">
@@ -667,6 +668,8 @@ async function pageStatus(id){
    const alasan=r.log.filter(l=>l.ket&&['Ditolak','Dikembalikan'].includes(r.status)&&/Menolak|Mengembalikan/.test(l.aksi));
    out=`<p><b>${esc(r.general.judul)}</b><br>${esc(r.general.kontraktor)} · ${esc(r.general.plant)} · ${esc(r.general.lokasi)} · ${fmt(r.general.mulai)} s/d ${fmt(r.general.selesai)}</p>${flowHtml(r.eff)}<p>${pill(r.eff)}</p>
    ${alasan.map(l=>`<p class="err">Alasan ${l.aksi==='Menolak'?'penolakan':'pengembalian'}: ${esc(l.ket)}</p>`).join('')}
+   ${r.canRevise?`<div class="panel" style="margin-top:10px"><b>Perbaiki dan ajukan ulang</b><div class="note" style="margin:4px 0 8px">Data pengajuan akan terisi otomatis, Anda hanya mengubah yang salah. Masukkan kode revisi yang Anda terima saat mengajukan.</div><label class="f" style="max-width:300px">Kode revisi<input id="revk" autocomplete="off" placeholder="XXXX-XXXX" value="${esc(((revStore.get()[r.id]||'')).replace(/^(.{4})(.+)$/,'$1-$2'))}"></label><div class="actions"><button class="btn primary" data-act="revstart" data-id="${esc(r.id)}">Perbaiki dan ajukan ulang</button></div></div>`:''}
+   ${r.revisiKe?`<p class="note">Permit ini sudah diajukan ulang sebagai <a href="#/status/${encodeURIComponent(r.revisiKe)}"><b>${esc(r.revisiKe)}</b></a>.</p>`:''}${r.revisiDari?`<p class="note">Permit ini adalah revisi dari ${esc(r.revisiDari)}.</p>`:''}
    ${r.eff==='Aktif'||r.eff==='Disetujui'?'<p class="note">Tempelkan lembar izin di area kerja. Konfirmasi kondisi lapangan, persetujuan dan isolasi energi sebelum mulai.</p>':''}
    ${r.canSheet?`<div class="actions"><a class="btn primary" href="#/lembar/${encodeURIComponent(r.id)}">Unduh lembar izin (PDF)</a></div>`:''}
    <ol class="log" style="margin-top:14px">${r.log.map(l=>`<li><time>${fmtDT(l.t)}</time><span>${esc(l.party)}: ${esc(l.aksi)}</span></li>`).join('')}</ol>`;
@@ -806,7 +809,7 @@ async function pageDetail(id){
   if(isH&&p.status==='Disetujui')act=`<h3>Penutupan</h3><label class="f" style="margin-top:8px">Catatan penutupan<textarea id="note" rows="2" placeholder="Contoh: pekerjaan selesai, area bersih"></textarea></label><label class="review-check"><input type="checkbox" id="gate-close"> Pekerjaan telah selesai; lokasi aman, peralatan dan sisa material sudah ditangani, serta area diserahkan kembali.</label><div class="actions"><button class="btn primary" data-act="do" data-a="close">Tutup permit</button></div>`;
   const gas=p.types.includes('ruang')?gasPanel(p,isH&&e==='Aktif'):'';
   app.innerHTML=`<button class="back" data-act="nav" data-to="#/app">&larr; Kembali ke daftar</button>
-  <div class="panel"><div style="display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:space-between;align-items:center"><div><div style="font-family:var(--mono);color:var(--muted)">${esc(p.id)}</div><h2>${esc(g.judul)}</h2></div><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">${dlBtn(p)}${pill(e)}</span></div>${flowHtml(e)}${e==='Aktif'?'<p class="note">Lembar izin wajib ditempel di area kerja.</p>':''}${e==='Kedaluwarsa'?'<p class="note" style="color:var(--bad)">Masa berlaku telah lewat: pekerjaan tidak boleh dilanjutkan. HSE harus meninjau dan menutup/menerbitkan izin baru sesuai SOP.</p>':''}</div>
+  <div class="panel"><div style="display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:space-between;align-items:center"><div><div style="font-family:var(--mono);color:var(--muted)">${esc(p.id)}</div><h2>${esc(g.judul)}</h2>${p.revisiDari?`<div class="note">Revisi dari ${esc(p.revisiDari)}</div>`:''}${p.revisiKe?`<div class="note">Telah diajukan ulang sebagai ${esc(p.revisiKe)}</div>`:''}</div><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">${dlBtn(p)}${pill(e)}</span></div>${flowHtml(e)}${e==='Aktif'?'<p class="note">Lembar izin wajib ditempel di area kerja.</p>':''}${e==='Kedaluwarsa'?'<p class="note" style="color:var(--bad)">Masa berlaku telah lewat: pekerjaan tidak boleh dilanjutkan. HSE harus meninjau dan menutup/menerbitkan izin baru sesuai SOP.</p>':''}</div>
   ${act?`<div class="panel">${act}</div>`:''}
   <div class="panel"><h3 style="margin-bottom:10px">Data kerja</h3>${dl(g)}${g.keterangan?`<p style="margin:12px 0 0"><span class="note">Keterangan:</span> ${esc(g.keterangan)}</p>`:''}</div>
   <div class="panel"><h3 style="margin-bottom:10px">Pekerja</h3><div class="tablewrap"><table><thead><tr><th>No</th><th>Nama</th><th>Unit kerja</th><th>No. identitas</th></tr></thead><tbody>${p.workers.map((w,i)=>`<tr><td class="n">${i+1}</td><td>${esc(w.nama)}</td><td>${esc(w.unit)}</td><td>${idLabel(w)}</td></tr>`).join('')}</tbody></table></div></div>
@@ -1114,8 +1117,8 @@ const ACT={
   }
   sendingPermit=true;
   try{
-   const r=await api('submit',{general:g,workers:wiz.workers,types:wiz.types,checks:wiz.checks,apd:wiz.apd,desc,jsea:wiz.jsea,hp:($('#hp')||{}).value||''},false);
-   wizDone=r.id;wizDone_dept=g.dept;ls.del('wp-draft');wiz=null;wstep=0;window.scrollTo(0,0);current();
+   const r=await api('submit',{general:g,workers:wiz.workers,types:wiz.types,checks:wiz.checks,apd:wiz.apd,desc,jsea:wiz.jsea,revisiDari:wiz.revisi?{id:wiz.revisi.id,kode:wiz.revisi.kode}:undefined,hp:($('#hp')||{}).value||''},false);
+   wizDone=r.id;wizKode=r.kode||'';if(r.kode)revStore.put(r.id,r.kode);wizDone_dept=g.dept;ls.del('wp-draft');wiz=null;wstep=0;window.scrollTo(0,0);current();
   }catch(e){wizErr=e.message;current()}finally{sendingPermit=false}
  },
  addw:()=>{wiz.workers.push({nama:'',unit:'',idt:'',idn:''});saveDraft();current()},
@@ -1126,6 +1129,18 @@ const ACT={
  freset:()=>{Object.keys(fl).forEach(k=>fl[k]='');current()},
  reload:()=>route(),
  monreload:()=>pageMonitoring(),
+ revstart:async b=>{
+  const id=b.dataset.id,kode=String(($('#revk')||{}).value||'').trim();if(!kode){toast('Masukkan kode revisi.');return}
+  try{const r=await api('revisi_get',{id,kode},false),d=r.data;
+   const w=newDraft();w.general=Object.assign(w.general,d.general);w.general.jumlah=String(d.general.jumlah||d.workers.length);
+   if(w.general.mulai<todayJ())w.general.mulai=addDays(1);if(w.general.selesai<w.general.mulai)w.general.selesai=w.general.mulai;
+   w.workers=d.workers.map(x=>({nama:x.nama||'',unit:x.unit||'',idt:x.idt||'',idn:x.idn||''}));w.types=d.types||[];w.checks=d.checks||{};w.apd=d.apd||{};w.jsea=(d.jsea&&d.jsea.length?d.jsea:w.jsea);
+   const MK='\n\nALASAN T/A (wajib diverifikasi HSE):\n';w.desc={};w.taReasons={};
+   for(const k of w.types){const t=String((d.desc||{})[k]||''),i=t.indexOf(MK);w.desc[k]=i<0?t:t.slice(0,i);
+    if(i>=0&&TYPES[k]){const lines=t.slice(i+MK.length).split('\n');w.taReasons[k]={};lines.forEach(ln=>{const m=ln.match(/^(\d+)\. /);if(!m)return;const n=+m[1]-1,pre=`${n+1}. ${TYPES[k].items[n]} — `;if(ln.startsWith(pre))w.taReasons[k][n]=ln.slice(pre.length)})}}
+   w.revisi={id:r.id,kode,alasan:r.alasan};wiz=w;wstep=0;wizErr='';revStore.put(r.id,kode.toUpperCase().replace(/[^A-Z0-9]/g,''));saveDraft();toast('Data pengajuan dimuat. Perbaiki lalu kirim ulang.');location.hash='#/ajukan';
+  }catch(e){toast(e.message)}
+ },
  resetdraft:()=>{if(!confirm('Hapus draf lokal dan mulai ulang formulir?'))return;ls.del('wp-draft');wiz=newDraft();wstep=0;wizErr='';toast('Draf lokal dihapus.');current()},
  do:b=>doAct(b.dataset.a),
  padclear:()=>{const c=$('#pad');c.getContext('2d').clearRect(0,0,c.width,c.height);padDirty=false;$('#padmsg').textContent=''},
