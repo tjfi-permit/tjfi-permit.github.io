@@ -408,11 +408,13 @@ function departmentsForPlant(plant){
  if(plant==='Plant 1 dan Plant 2')return DEPTS_BY_PLANT['Plant 1'].filter(d=>DEPTS_BY_PLANT['Plant 2'].includes(d));
  return [];
 }
-function deptSelectHtml(plant,current){
+function deptSelectHtml(plant,current,withHse){
  let opts=departmentsForPlant(plant);
+ const base=opts;
+ if(withHse&&plant)opts=[...opts,'HSE'];
  if(current&&!opts.includes(current))opts=[current,...opts]; // data lama tidak hilang saat dibuka
  return `<option value="">${plant?'Pilih departemen':'Pilih plant terlebih dahulu'}</option>`+
-  opts.map(d=>`<option value="${esc(d)}" ${current===d?'selected':''}>${esc(d)}${!departmentsForPlant(plant).includes(d)?' (historis)':''}</option>`).join('');
+  opts.map(d=>`<option value="${esc(d)}" ${current===d?'selected':''}>${esc(d)}${!base.includes(d)&&!(withHse&&d==='HSE')?' (historis)':''}</option>`).join('');
 }
 
 const FLOW=['Diajukan','Diketahui','Disetujui','Aktif','Selesai'];
@@ -609,7 +611,7 @@ function stepGeneral(){const g=wiz.general;return `<h3 style="margin-bottom:12px
  ${wi('general.judul','Judul kerja','text','wide')}
  ${wi('general.lokasi','Lokasi kerja (area / bangunan)')}
  <label class="f">Plant tempat pekerjaan<select id="wiz-plant" data-ctx="wiz" data-bind="general.plant"><option value="">Pilih plant</option>${PLANTS.map(d=>`<option ${g.plant===d?'selected':''}>${d}</option>`).join('')}</select></label>
- <label class="f">Dept. pemberi kerja<select id="wiz-dept" data-ctx="wiz" data-bind="general.dept">${deptSelectHtml(g.plant,g.dept)}</select></label>
+ <label class="f">Dept. pemberi kerja<select id="wiz-dept" data-ctx="wiz" data-bind="general.dept">${deptSelectHtml(g.plant,g.dept,true)}</select></label>
  ${wi('general.picTjfi','PIC PT TJFI')}${wi('general.telpTjfi','Telepon PIC TJFI','tel')}
  ${wi('general.picKon','PIC kontraktor')}${wi('general.telpKon','Telepon PIC kontraktor','tel')}
  ${wi('general.pengawasKon','Pengawas K3 kontraktor')}${wi('general.telpPengawas','Telepon pengawas K3','tel')}
@@ -646,7 +648,7 @@ function validate(){
  if(wstep===0){
   for(const [k,l] of [['kontraktor','nama kontraktor'],['judul','judul kerja'],['lokasi','lokasi kerja'],['plant','plant tempat pekerjaan'],['dept','departemen pemberi kerja'],['picKon','PIC kontraktor'],['pengawasKon','pengawas K3 kontraktor'],['jumlah','jumlah pekerja']])if(!String(g[k]).trim())return 'Isi '+l+' terlebih dahulu.';
   if(!Number.isInteger(+g.jumlah)||+g.jumlah<1||+g.jumlah>500)return 'Jumlah pekerja harus 1 sampai 500 orang.';
-  if(!departmentsForPlant(g.plant).includes(g.dept))return 'Departemen tidak sesuai dengan plant yang dipilih.';
+  if(g.dept!=='HSE'&&!departmentsForPlant(g.plant).includes(g.dept))return 'Departemen tidak sesuai dengan plant yang dipilih.';
   if(!g.picTjfi.trim())return 'Isi PIC PT TJForge Indonesia yang bertanggung jawab.';
   if(!g.telpTjfi.trim()||!g.telpKon.trim())return 'Isi nomor kontak PIC TJForge dan PIC kontraktor.';
   if(!g.mulai||!g.selesai)return 'Isi tanggal mulai dan selesai.';
@@ -835,7 +837,7 @@ async function pageDetail(id){
  draw(()=>{
   const p=S.cur,e=p.eff,isH=S.user.role==='HSE',g=p.general;
   let act='';
-  if(!isH&&p.status==='Diajukan')act=`<h3>Tindakan departemen</h3><label class="f" style="margin-top:8px">Catatan (wajib bila dikembalikan)<textarea id="note" rows="2"></textarea></label><label class="review-check"><input type="checkbox" id="gate-dept"> Saya telah memeriksa kesesuaian pekerjaan, lokasi/area, PIC, dan dokumen JSEA (harus divalidasi di lapangan).</label><div class="actions"><button class="btn ok" data-act="do" data-a="know">Ketahui</button><button class="btn bad" data-act="do" data-a="return">Kembalikan ke kontraktor</button></div>`;
+  if((!isH||g.dept==='HSE')&&p.status==='Diajukan')act=`<h3>Tindakan departemen${isH?' (proyek HSE)':''}</h3>${isH?'<p class="note">Proyek ini milik HSE. Setelah Anda mengetahui, keputusan akhir harus dilakukan oleh HSE lain.</p>':''}<label class="f" style="margin-top:8px">Catatan (wajib bila dikembalikan)<textarea id="note" rows="2"></textarea></label><label class="review-check"><input type="checkbox" id="gate-dept"> Saya telah memeriksa kesesuaian pekerjaan, lokasi/area, PIC, dan dokumen JSEA (harus divalidasi di lapangan).</label><div class="actions"><button class="btn ok" data-act="do" data-a="know">Ketahui</button><button class="btn bad" data-act="do" data-a="return">Kembalikan ke kontraktor</button></div>`;
   if(isH&&p.status==='Diketahui')act=`<h3>Keputusan HSE</h3><label class="f" style="margin-top:8px">Catatan (wajib bila dikembalikan atau ditolak)<textarea id="note" rows="2"></textarea></label><label class="review-check"><input type="checkbox" id="gate-hse"> Saya telah memeriksa pengendalian risiko, checklist/APD, JSEA dan kesiapan tindakan darurat melalui pemeriksaan lapangan.</label>${p.types.includes('ruang')?'<label class="review-check"><input type="checkbox" id="gate-confined"> Pengujian atmosfer, petugas siaga, alat ukur, izin masuk dan rencana rescue telah diverifikasi menurut SOP confined space.</label>':''}<div class="actions"><button class="btn ok" data-act="do" data-a="approve">Setujui</button><button class="btn" data-act="do" data-a="return">Kembalikan ke kontraktor</button><button class="btn bad" data-act="do" data-a="reject">Tolak</button></div><p class="note" style="margin-top:8px"><b>Kembalikan</b> bila data masih bisa diperbaiki kontraktor (kontraktor memperbaiki lewat kode revisi). <b>Tolak</b> bila pekerjaan tidak dapat disetujui; penolakan bersifat final dan kontraktor harus mengajukan permit baru.</p>`;
   if(isH&&p.status==='Diajukan')act=`<p class="note">Menunggu departemen pemberi kerja mengetahui permit ini.</p>`;
   if(isH&&p.status==='Disetujui')act=`<h3>Penutupan</h3><label class="f" style="margin-top:8px">Catatan penutupan<textarea id="note" rows="2" placeholder="Contoh: pekerjaan selesai, area bersih"></textarea></label><label class="review-check"><input type="checkbox" id="gate-close"> Pekerjaan telah selesai; lokasi aman, peralatan dan sisa material sudah ditangani, serta area diserahkan kembali.</label><div class="actions"><button class="btn primary" data-act="do" data-a="close">Tutup permit</button></div>`;
