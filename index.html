@@ -550,7 +550,7 @@ function home(){
  </div></section>`});
 }
 /* ===== Kontraktor: pengajuan ===== */
-const newDraft=()=>({taReasons:{},general:{kontraktor:'',alamat:'',judul:'',lokasi:'',plant:'',dept:'',picTjfi:'',telpTjfi:'',picKon:'',telpKon:'',pengawasKon:'',telpPengawas:'',jumlah:'',mulai:addDays(1),selesai:addDays(1),keterangan:''},workers:[{nama:'',unit:'',idn:''},{nama:'',unit:'',idn:''},{nama:'',unit:'',idn:''}],types:[],checks:{},apd:{},desc:{},jsea:[{tahap:'',pic:'',bahaya:'',kendali:'',lingk:'',kendaliLing:''}]});
+const newDraft=()=>({taReasons:{},general:{kontraktor:'',alamat:'',judul:'',lokasi:'',plant:'',dept:'',picTjfi:'',telpTjfi:'',picKon:'',telpKon:'',pengawasKon:'',telpPengawas:'',jumlah:'',mulai:addDays(1),selesai:addDays(1),keterangan:''},workers:[{nama:'',unit:'',idt:'',idn:''},{nama:'',unit:'',idt:'',idn:''},{nama:'',unit:'',idt:'',idn:''}],types:[],checks:{},apd:{},desc:{},jsea:[{tahap:'',pic:'',bahaya:'',kendali:'',lingk:'',kendaliLing:''}]});
 let wiz=null,wstep=0,wizErr='',wizDone=null,draftT;
 const STEPS=['Data kerja','Pekerja','Jenis izin','JSEA','Kirim'];
 function loadDraft(){
@@ -584,9 +584,13 @@ function stepGeneral(){const g=wiz.general;return `<h3 style="margin-bottom:12px
  ${wi('general.jumlah','Jumlah pekerja','number','','min="1" max="500"')}
  ${wi('general.mulai','Tanggal mulai','date')}${wi('general.selesai','Tanggal selesai','date')}
  <label class="f wide">Keterangan pekerjaan<textarea id="wiz-ket" data-ctx="wiz" data-bind="general.keterangan" rows="3">${esc(g.keterangan)}</textarea></label></div>`}
-function syncWorkers(){const n=+wiz.general.jumlah;if(!Number.isInteger(n)||n<1||n>500)return 0;while(wiz.workers.length<n)wiz.workers.push({nama:'',unit:'',idn:''});if(wiz.workers.length>n)wiz.workers.length=n;return n}
+const ID_TYPES=['KTP','SIM','Paspor'],ID_HINT={KTP:'NIK 16 digit',SIM:'Nomor SIM (angka)',Paspor:'Nomor paspor'};
+function idnError(w){const t=w.idt,n=String(w.idn||'').trim();if(!ID_TYPES.includes(t))return 'pilih jenis identitas (KTP, SIM, atau Paspor).';if(!n)return 'nomor identitas wajib diisi.';
+ if(t==='KTP'&&!/^\d{16}$/.test(n))return 'nomor KTP (NIK) harus 16 digit angka.';if(t==='SIM'&&!/^\d{10,16}$/.test(n))return 'nomor SIM harus 10 sampai 16 digit angka.';if(t==='Paspor'&&!/^[A-Za-z0-9]{6,12}$/.test(n))return 'nomor paspor harus 6 sampai 12 huruf/angka.';return ''}
+function idLabel(w){return (w.idt?esc(w.idt)+' ':'')+esc(w.idn)}
+function syncWorkers(){const n=+wiz.general.jumlah;if(!Number.isInteger(n)||n<1||n>500)return 0;while(wiz.workers.length<n)wiz.workers.push({nama:'',unit:'',idt:'',idn:''});if(wiz.workers.length>n)wiz.workers.length=n;return n}
 function stepWorkers(){const n=syncWorkers();if(!n)return `<h3>Daftar pekerja</h3><p class="alert-danger">Isi jumlah pekerja (1 sampai 500) di langkah 1. Data kerja terlebih dahulu.</p>`;return `<h3>Daftar pekerja</h3><p class="note" style="margin:4px 0 6px">Nomor identitas diisi KTP atau SIM. Pekerja wajib membawa identitas dan memakai kartu pengenal serta seragam di area TJFI.</p><p class="note" style="margin:0 0 12px"><b>${n} pekerja</b> sesuai jumlah pada data kerja. Semua kolom wajib diisi. Untuk mengubah jumlahnya, kembali ke langkah 1.</p>
- <div class="tablewrap"><table><thead><tr><th>No</th><th>Nama</th><th>Unit kerja</th><th>No. identitas</th></tr></thead><tbody>${wiz.workers.map((w,i)=>`<tr><td class="n">${i+1}</td>${['nama','unit','idn'].map(k=>`<td><input class="cell" id="wk-${i}-${k}" data-ctx="wiz" data-bind="workers.${i}.${k}" value="${esc(w[k])}" aria-label="${k} pekerja ${i+1}"></td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+ <div class="tablewrap"><table><thead><tr><th>No</th><th>Nama</th><th>Unit kerja</th><th>Jenis identitas</th><th>No. identitas</th></tr></thead><tbody>${wiz.workers.map((w,i)=>`<tr><td class="n">${i+1}</td>${['nama','unit'].map(k=>`<td><input class="cell" id="wk-${i}-${k}" data-ctx="wiz" data-bind="workers.${i}.${k}" value="${esc(w[k])}" aria-label="${k} pekerja ${i+1}"></td>`).join('')}<td><select class="cell" id="wk-${i}-idt" data-ctx="wiz" data-bind="workers.${i}.idt" data-rr="1" aria-label="jenis identitas pekerja ${i+1}"><option value="">Pilih</option>${ID_TYPES.map(t=>`<option ${w.idt===t?'selected':''}>${t}</option>`).join('')}</select></td><td><input class="cell" id="wk-${i}-idn" data-ctx="wiz" data-bind="workers.${i}.idn" value="${esc(w.idn)}" ${w.idt?'':'disabled'} placeholder="${esc(ID_HINT[w.idt]||'Pilih jenis identitas dulu')}" inputmode="${w.idt==='Paspor'?'text':'numeric'}" aria-label="nomor identitas pekerja ${i+1}"></td></tr>`).join('')}</tbody></table></div>`}
 function stepTypes(){
  const pick=Object.entries(TYPES).map(([k,t])=>`<label><input type="checkbox" data-chk="type" data-k="${k}" ${wiz.types.includes(k)?'checked':''}><span><b>${t.nama}</b><small>${t.sub}</small></span></label>`).join('');
  return `<h3>Jenis izin khusus</h3><p class="note" style="margin:4px 0 12px">Centang semua yang diperlukan. Bisa lebih dari satu untuk satu pekerjaan.</p><div class="typepick">${pick}</div>${wiz.types.map(k=>typeSection(k,wiz,true)).join('')}`}
@@ -620,8 +624,9 @@ function validate(){
  if(wstep===1){
   const n=syncWorkers();if(!n)return 'Isi jumlah pekerja (1 sampai 500) di langkah 1 terlebih dahulu.';
   const rows=wiz.workers;
-  const kosong=rows.findIndex(w=>!w.nama.trim()||!w.unit.trim()||!w.idn.trim());
-  if(kosong>=0)return `Data pekerja nomor ${kosong+1} belum lengkap. Semua ${n} pekerja wajib diisi nama, unit kerja, dan nomor identitas.`;
+  const kosong=rows.findIndex(w=>!w.nama.trim()||!w.unit.trim()||!(w.idn||'').trim()||!w.idt);
+  if(kosong>=0)return `Data pekerja nomor ${kosong+1} belum lengkap. Semua ${n} pekerja wajib diisi nama, unit kerja, jenis identitas, dan nomor identitas.`;
+  const bad=rows.findIndex(w=>idnError(w));if(bad>=0)return `Pekerja nomor ${bad+1}: ${idnError(rows[bad])}`;
   const ids=rows.map(w=>w.idn.trim().toLowerCase());if(new Set(ids).size!==ids.length)return 'Nomor identitas pekerja tidak boleh duplikat.';
  }
  if(wstep===2){
@@ -687,7 +692,7 @@ function sheetHtml(p){
  const types=p.types.map(k=>{const t=TYPES[k],ck=(p.checks&&p.checks[k])||[];
   return `<h3>${t.nama}</h3>${t.draft?'<p class="sh-note">Draf: isi checklist menunggu konfirmasi HSE.</p>':''}${p.desc&&p.desc[k]?`<p style="margin:2px 0 4px">Uraian pekerjaan: ${esc(p.desc[k])}</p>`:''}<table><thead><tr><th style="width:30px">No</th><th>Pemeriksaan</th><th style="width:56px">Ya / T/A</th></tr></thead><tbody>${t.items.map((it,i)=>`<tr><td>${i+1}</td><td>${esc(it)}</td><td style="text-align:center">${ck[i]==='y'?'Ya':ck[i]==='t'?'T/A':'-'}</td></tr>`).join('')}</tbody></table><p class="sh-note" style="margin:3px 0 0">Keterangan: <b>Ya</b> = persyaratan sudah dipenuhi dan sesuai di lapangan; <b>T/A</b> = Tidak Applicable (tidak berlaku untuk pekerjaan ini, alasan diverifikasi HSE); <b>Tidak</b> = persyaratan belum dipenuhi (izin tidak dapat diajukan).</p><p style="margin:4px 0 0"><b>APD:</b> ${esc(((p.apd&&p.apd[k])||[]).join(', '))||'-'}</p>`}).join('');
  const gas=p.types.includes('ruang')&&p.gas.length?`<h3>Pemantauan gas (ruang tertutup)</h3><p class="sh-note">Indikasi pembacaan saja. Wajib validasi HSE & SOP, bukan keputusan aman masuk.</p><table><thead><tr><th>Tanggal</th><th>Waktu</th><th>O2 (%)</th><th>LEL (%)</th><th>Beracun</th><th>Paraf</th><th>Screening*</th></tr></thead><tbody>${p.gas.map(r=>`<tr><td>${fmt(r.tanggal)}</td><td>${esc(r.waktu)}</td><td>${esc(r.o2)}</td><td>${esc(r.lel)}</td><td>${esc(r.toks)}</td><td>${esc(r.paraf)}</td><td>${gasBad(r)?'Indikasi bahaya':'Verifikasi HSE'}</td></tr>`).join('')}</tbody></table>`:'';
- const wk=`<table><thead><tr><th style="width:30px">No</th><th>Nama</th><th>Unit kerja</th><th>No. identitas</th></tr></thead><tbody>${p.workers.map((w,i)=>`<tr><td>${i+1}</td><td>${esc(w.nama)}</td><td>${esc(w.unit)}</td><td>${esc(w.idn)}</td></tr>`).join('')}</tbody></table>`;
+ const wk=`<table><thead><tr><th style="width:30px">No</th><th>Nama</th><th>Unit kerja</th><th>No. identitas</th></tr></thead><tbody>${p.workers.map((w,i)=>`<tr><td>${i+1}</td><td>${esc(w.nama)}</td><td>${esc(w.unit)}</td><td>${idLabel(w)}</td></tr>`).join('')}</tbody></table>`;
  const js=`<table><thead><tr><th style="width:30px">No</th><th>Tahapan</th><th>PIC</th><th>Bahaya</th><th>Pengendalian</th><th>Aspek lingkungan</th><th>Pengendalian dampak</th></tr></thead><tbody>${p.jsea.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.tahap)}</td><td>${esc(r.pic)}</td><td>${esc(r.bahaya)}</td><td>${esc(r.kendali)}</td><td>${esc(r.lingk)}</td><td>${esc(r.kendaliLing)}</td></tr>`).join('')}</tbody></table>`;
  const sd=s.dept?`<div class="dsig"><b>Ditandatangani secara digital</b><br>${esc(s.dept.nama)}<br>${esc(s.dept.jab)}<br>${fmtDT(s.dept.waktu)}<br>Kode verifikasi: <span class="mono">${esc(s.dept.kode)}</span></div>`:'<p>Belum ditandatangani.</p>';
  const okImg=s.hse&&s.hse.ttd&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(s.hse.ttd);
@@ -804,7 +809,7 @@ async function pageDetail(id){
   <div class="panel"><div style="display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:space-between;align-items:center"><div><div style="font-family:var(--mono);color:var(--muted)">${esc(p.id)}</div><h2>${esc(g.judul)}</h2></div><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">${dlBtn(p)}${pill(e)}</span></div>${flowHtml(e)}${e==='Aktif'?'<p class="note">Lembar izin wajib ditempel di area kerja.</p>':''}${e==='Kedaluwarsa'?'<p class="note" style="color:var(--bad)">Masa berlaku telah lewat: pekerjaan tidak boleh dilanjutkan. HSE harus meninjau dan menutup/menerbitkan izin baru sesuai SOP.</p>':''}</div>
   ${act?`<div class="panel">${act}</div>`:''}
   <div class="panel"><h3 style="margin-bottom:10px">Data kerja</h3>${dl(g)}${g.keterangan?`<p style="margin:12px 0 0"><span class="note">Keterangan:</span> ${esc(g.keterangan)}</p>`:''}</div>
-  <div class="panel"><h3 style="margin-bottom:10px">Pekerja</h3><div class="tablewrap"><table><thead><tr><th>No</th><th>Nama</th><th>Unit kerja</th><th>No. identitas</th></tr></thead><tbody>${p.workers.map((w,i)=>`<tr><td class="n">${i+1}</td><td>${esc(w.nama)}</td><td>${esc(w.unit)}</td><td>${esc(w.idn)}</td></tr>`).join('')}</tbody></table></div></div>
+  <div class="panel"><h3 style="margin-bottom:10px">Pekerja</h3><div class="tablewrap"><table><thead><tr><th>No</th><th>Nama</th><th>Unit kerja</th><th>No. identitas</th></tr></thead><tbody>${p.workers.map((w,i)=>`<tr><td class="n">${i+1}</td><td>${esc(w.nama)}</td><td>${esc(w.unit)}</td><td>${idLabel(w)}</td></tr>`).join('')}</tbody></table></div></div>
   ${p.types.map(k=>`<div class="panel">${typeSection(k,p,false)}</div>`).join('')}
   ${gas}
   <div class="panel"><h3 style="margin-bottom:10px">JSEA</h3><div class="tablewrap"><table style="min-width:900px"><thead><tr><th>No</th><th>Tahapan</th><th>PIC</th><th>Bahaya</th><th>Pengendalian</th><th>Aspek lingkungan</th><th>Pengendalian dampak</th></tr></thead><tbody>${p.jsea.map((r,i)=>`<tr><td class="n">${i+1}</td><td>${esc(r.tahap)}</td><td>${esc(r.pic)}</td><td>${esc(r.bahaya)}</td><td>${esc(r.kendali)}</td><td>${esc(r.lingk)}</td><td>${esc(r.kendaliLing)}</td></tr>`).join('')}</tbody></table></div></div>
@@ -1113,7 +1118,7 @@ const ACT={
    wizDone=r.id;wizDone_dept=g.dept;ls.del('wp-draft');wiz=null;wstep=0;window.scrollTo(0,0);current();
   }catch(e){wizErr=e.message;current()}finally{sendingPermit=false}
  },
- addw:()=>{wiz.workers.push({nama:'',unit:'',idn:''});saveDraft();current()},
+ addw:()=>{wiz.workers.push({nama:'',unit:'',idt:'',idn:''});saveDraft();current()},
  addj:()=>{wiz.jsea.push({tahap:'',pic:'',bahaya:'',kendali:'',lingk:'',kendaliLing:''});saveDraft();current()},
  ck:b=>{wiz.checks[b.dataset.k][+b.dataset.i]=b.dataset.v;wiz.taReasons=wiz.taReasons||{};wiz.taReasons[b.dataset.k]=wiz.taReasons[b.dataset.k]||{};if(b.dataset.v!=='t')delete wiz.taReasons[b.dataset.k][+b.dataset.i];saveDraft();current()},
  filter:b=>{filter=b.dataset.k;current()},
