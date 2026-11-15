@@ -356,71 +356,6 @@ body.busy #busyov{display:flex;animation:ldin .2s ease .45s both}
 @media print{#splash,#busyov{display:none!important}}
 
 .k3box{max-height:52vh;overflow:auto;border:1px solid var(--line,#d5dae1);border-radius:10px;padding:12px 16px;background:#fff}.k3list{margin:0;padding-left:22px}.k3list>li{margin:0 0 10px}.k3list ul{margin:4px 0 0;padding-left:20px;list-style:disc}.k3ok{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border:2px solid var(--accent,#ff8200);border-radius:10px;cursor:pointer}.k3ok input{margin-top:3px;width:18px;height:18px;flex:none}@media print{.k3box{max-height:none;border:0}}
-
-/* ===== Login: Safety Studio ===== */
-.lgmode .site-header,.lgmode .topline,.lgmode .lp-foot{display:none}
-.lgv{--lg-ink:#1a2b32;--lg-muted:#718096;--lg-brand:#197f77;--lg-line:#e2eae7;--lg-accent:#ff8200;min-height:100vh;background:#f6f8f6;color:var(--lg-ink)}
-.lgv *{box-sizing:border-box}
-.lg-shell{min-height:100vh;max-width:1500px;margin:auto;padding:35px 40px;display:grid;grid-template-columns:.94fr 1.06fr;gap:22px}
-.lg-hero,.lg-auth{position:relative;min-width:0;overflow:hidden}
-.lg-hero{border-radius:32px;background:#eaf4ef;display:flex;flex-direction:column;justify-content:space-between;color:#1b3f39;padding:40px 50px}
-.lg-hero::before{content:'';position:absolute;right:-180px;top:22%;width:430px;height:430px;border-radius:50%;border:75px solid rgba(25,127,119,.055)}
-.lg-auth{background:#fff;border:1px solid #e8efeb;border-radius:32px;box-shadow:0 30px 70px rgba(18,66,57,.055);padding:48px 58px;display:flex;flex-direction:column;justify-content:center}
-.lg-brand{display:flex;align-items:center;gap:16px;position:relative;z-index:2}
-.lg-brand .lg-logo{width:149px;height:auto;object-fit:contain;background:#fff;padding:8px 10px;border-radius:13px}
-.lg-brand .lg-mark{width:43px;height:43px;object-fit:contain;background:#fff;border-radius:12px;padding:5px}
-.lg-brand .lg-div{height:37px;width:1px;background:currentColor;opacity:.2}
-.lg-brand .lg-name{font-weight:850;letter-spacing:-.03em;font-size:15px;line-height:1.2}
-.lg-brand .lg-name span{display:block;letter-spacing:.02em;font-size:11px;font-weight:600;opacity:.7;margin-top:2px}
-.lg-copy{position:relative;z-index:2}
-.lg-stamp{display:inline-flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:11px;color:#187f78;margin-bottom:18px}
-.lg-pin{display:inline-flex;width:8px;height:8px;border-radius:50%;background:#20ce93;box-shadow:0 0 0 5px rgba(32,206,147,.12)}
-.lg-copy h1{margin:0;font-size:clamp(47px,4.9vw,70px);letter-spacing:-.06em;line-height:.99;font-weight:850;color:#153e37}
-.lg-copy h1 em{font-style:normal;color:#ff8200}
-.lg-copy p{margin:22px 0 25px;max-width:530px;line-height:1.7;font-size:15px;color:#637d78}
-.lg-eyebrow{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
-.lg-cards{position:relative;height:310px;margin-top:23px}
-.lg-main{position:absolute;left:9%;top:5%;width:65%;height:245px;background:#1f7d73;border-radius:26px;box-shadow:0 20px 35px #236f6530;overflow:hidden;color:#fff;padding:23px}
-.lg-main .lg-big{width:82px;height:82px;margin:20px auto 6px;border-radius:26px;background:#ffffff22;display:grid;place-items:center;transform:rotate(-7deg)}
-.lg-main .lg-big svg{width:54px;height:54px;stroke:#fff}
-.lg-main b{font-size:20px;letter-spacing:-.03em}
-.lg-main p{font-size:12px;color:#c0e9df;line-height:1.5;margin:8px 0;max-width:150px}
-.lg-minor{position:absolute;right:0;top:30%;width:46%;background:#fff;border:1px solid #e3eee8;border-radius:22px;padding:19px 20px;box-shadow:0 17px 30px #28584c19;color:#23453e}
-.lg-minor b{font-size:34px;letter-spacing:-.06em}
-.lg-minor small{display:block;color:#8a9e97;margin-top:4px}
-.lg-prog{height:7px;border-radius:99px;background:#e3eee8;margin-top:14px;overflow:hidden}
-.lg-prog i{display:block;height:100%;background:#ff8200;border-radius:99px}
-.lg-lower{position:absolute;bottom:2px;left:2%;display:inline-flex;gap:9px;align-items:center;background:#fff;border-radius:999px;box-shadow:0 9px 25px #28584c10;padding:11px 16px;font-weight:800;font-size:11px}
-.lg-bottom{font-size:12px;color:#657e76;position:relative;z-index:2}
-.lg-inner{width:100%;max-width:450px;margin:0 auto}
-.lg-kicker{font-weight:850;letter-spacing:.12em;font-size:11px;color:var(--lg-accent);text-transform:uppercase}
-.lg-title{font-size:36px;letter-spacing:-.055em;margin:10px 0 8px;line-height:1.15;font-weight:850;color:var(--lg-ink)}
-.lg-intro{font-size:14px;line-height:1.65;color:var(--lg-muted);margin:0 0 25px}
-.lg-quick{width:100%;padding:15px 16px;display:flex;gap:12px;align-items:center;text-align:left;background:#1b857a;color:#fff;border-radius:14px;transition:transform .18s;text-decoration:none}
-.lg-quick:hover{transform:translateY(-2px)}
-.lg-quick .lg-qi{width:42px;height:42px;border-radius:12px;background:#ffffff22;display:grid;place-items:center;flex:none}
-.lg-quick .lg-qi svg,.lg-quick>svg{width:19px;height:19px}
-.lg-quick strong{display:block;font-size:15px}
-.lg-quick small{display:block;font-size:11px;opacity:.85;margin-top:3px}
-.lg-rule{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--lg-muted);margin:21px 0}
-.lg-rule::before,.lg-rule::after{content:'';height:1px;background:var(--lg-line);flex:1}
-.lg-field{display:block;margin-bottom:14px}
-.lg-field>span{display:block;font-size:12px;font-weight:800;margin-bottom:8px;color:var(--lg-ink)}
-.lg-field input{width:100%;height:50px;border:1px solid #dfe5ec;border-radius:12px;background:#f7f9fc;padding:0 14px;color:var(--lg-ink);outline:0;font:inherit}
-.lg-field input:focus{border-color:var(--lg-brand);background:#fff;box-shadow:0 0 0 4px rgba(25,127,119,.1)}
-.lg-wrap{position:relative}.lg-wrap input{padding-right:48px}
-.lg-eye{background:none;border:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);padding:8px;color:#6d7b8a;cursor:pointer}
-.lg-eye svg{width:19px;height:19px;display:block}
-.lg-meta{font-size:12px;color:var(--lg-muted);line-height:1.6;margin:13px 0 19px}
-.lg-submit{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 17px;border-radius:13px;font-weight:760;font-size:14px;background:var(--lg-accent);color:#fff;border:0;box-shadow:0 10px 22px rgba(255,129,0,.2);cursor:pointer;transition:transform .18s}
-.lg-submit:hover{transform:translateY(-2px)}
-.lg-submit svg{width:19px;height:19px;margin-left:auto}
-.lg-submit:focus-visible,.lg-quick:focus-visible,.lg-field input:focus-visible{outline:3px solid rgba(255,129,0,.38);outline-offset:2px}
-.lg-foot{display:flex;justify-content:space-between;gap:10px;margin-top:22px;align-items:center;font-size:11px;color:var(--lg-muted);flex-wrap:wrap}
-.lg-foot a{color:#137e75;font-weight:700;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
-.lg-foot svg{width:15px;height:15px}
-.lg-err{min-height:18px;color:#b63e29;font-size:12px;font-weight:700;margin-top:10px}
-@media(max-width:900px){.lg-shell{display:block;padding:0}.lg-hero{border-radius:0;min-height:280px;padding:26px 23px 32px}.lg-auth{border-radius:28px 28px 0 0;margin-top:-9px;padding:36px 22px;min-height:500px}.lg-brand{gap:12px}.lg-brand .lg-logo{width:112px}.lg-brand .lg-name{font-size:13px}.lg-brand .lg-name span{font-size:9px}.lg-cards{height:225px}.lg-main{height:150px;top:0;left:2%;width:68%;padding:15px}.lg-minor small{display:none}.lg-main .lg-big{width:44px;height:44px;margin:6px auto}.lg-main .lg-big svg{width:27px;height:27px}.lg-main b{font-size:15px}.lg-main p{font-size:10px;margin:3px}.lg-minor{top:22%;width:44%;padding:13px}.lg-minor b{font-size:22px}.lg-lower{bottom:0;left:0}.lg-bottom{display:none}.lg-copy h1{font-size:44px}.lg-title{font-size:30px}}
 </style>
 </head>
 <body>
@@ -569,8 +504,7 @@ function renderTop(){
 async function route(){
  const parts=location.hash.replace(/^#\/?/,'').split('/').filter(Boolean).map(decodeURIComponent);
  renderTop();window.scrollTo(0,0);
- const lgm=parts[0]==='login'&&!(S.token&&S.user);document.body.classList.toggle('lgmode',lgm);
- app.className=(lgm||!parts.length||!['ajukan','status','lembar','login','app'].includes(parts[0]))?'':'page';
+ app.className=(!parts.length||!['ajukan','status','lembar','login','app'].includes(parts[0]))?'':'page';
  try{
   if(!parts.length)return await home();
   if(parts[0]==='ajukan')return await pageAjukan();
@@ -817,36 +751,9 @@ function sheetHtml(p){
 function pageLogin(){
  if(S.token&&S.user){location.hash='#/app';return}
  let err='';
- draw(()=>{app.innerHTML=`<div class="lgv"><div class="lg-shell">
-<div class="lg-hero">
- <div class="lg-brand"><img class="lg-logo" src="${LOGO}" alt="Logo TJForge Indonesia"><span class="lg-div"></span><img class="lg-mark" src="${MARK}" alt="Ikon SCS"><div class="lg-name">WORK PERMIT<span>SAFETY CONTROL SYSTEM</span></div></div>
- <div class="lg-copy">
-  <div class="lg-stamp"><span class="lg-pin"></span> SAFE WORKPLACE, EVERY DAY</div>
-  <h1>Izin kerja,<br><em>tertib dan aman.</em></h1>
-  <p>Ajukan, pantau, dan unduh izin kerja kontraktor dalam satu sistem. Setiap pekerjaan diketahui Dept. pemberi kerja dan disetujui HSE sebelum dimulai.</p>
-  <div class="lg-cards">
-   <div class="lg-main"><span class="lg-eyebrow">WORK PERMIT</span><div class="lg-big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z"/><path d="m8 12 3 3 5-5"/></svg></div><b>Safety first.</b><p>Izin disetujui sebelum pekerjaan dimulai.</p></div>
-   <div class="lg-minor"><span class="lg-eyebrow">ALUR PERSETUJUAN</span><div><b>3 tahap</b></div><small>Kontraktor, Dept., lalu HSE</small><div class="lg-prog"><i style="width:100%"></i></div></div>
-   <div class="lg-lower"><span class="lg-pin"></span> Terhubung di Plant 1 &amp; Plant 2</div>
-  </div>
- </div>
- <div class="lg-bottom">WORK PERMIT SYSTEM · PT TJFORGE INDONESIA</div>
-</div>
-<div class="lg-auth"><div class="lg-inner">
- <div class="lg-kicker">PT TJFORGE INDONESIA / SCS</div>
- <h2 class="lg-title">Selamat datang<span style="color:var(--lg-accent)">.</span></h2>
- <p class="lg-intro">Masuk untuk memeriksa dan memantau permit. Akun ini untuk HSE dan Departemen Pemberi Kerja. Kontraktor tidak perlu login.</p>
- <a class="lg-quick" href="#/ajukan"><span class="lg-qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span style="flex:1"><strong>Ajukan Izin Kerja</strong><small>Untuk kontraktor, tanpa login</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a>
- <div class="lg-rule">atau masuk sebagai petugas</div>
- <form data-form="login">
-  <label class="lg-field"><span>Username</span><input id="lg-u" autocomplete="username" autocapitalize="none" placeholder="Username petugas" required></label>
-  <label class="lg-field"><span>Password</span><div class="lg-wrap"><input id="lg-p" type="password" autocomplete="current-password" placeholder="Masukkan password" required><button type="button" class="lg-eye" data-act="eye" aria-label="Tampilkan password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
-  <div class="lg-meta">Lupa password? Hubungi HSE untuk direset.</div>
-  <button class="lg-submit" type="submit">Masuk ke Dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
-  <div class="lg-err err" role="alert">${esc(err)}</div>
- </form>
- <div class="lg-foot"><a href="panduan.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Zm0 14a2 2 0 0 1 2-2h13"/></svg> Panduan penggunaan</a><a href="#/status">Cek status permit</a><a href="#" data-act="setapi">Atur alamat server</a></div>
-</div></div></div></div>`});
+ draw(()=>{app.innerHTML=`<div class="loginbox"><div class="panel"><h2 style="margin-bottom:4px">Login staf TJFI</h2><p class="note" style="margin:0 0 12px">Untuk HSE dan Departemen Pemberi Kerja. Kontraktor tidak perlu login.</p>
+ <form data-form="login"><div class="grid" style="grid-template-columns:1fr"><label class="f">Username<input id="lg-u" autocomplete="username" autocapitalize="none" required></label><label class="f">Password<input id="lg-p" type="password" autocomplete="current-password" required></label></div><div class="actions"><button class="btn primary" type="submit">Masuk</button></div><div class="err" role="alert">${esc(err)}</div></form>
+ <p class="note" style="margin-top:14px">Lupa password? Hubungi HSE untuk direset.</p><p class="note"><a href="#" data-act="setapi">Atur alamat server</a></p></div></div>`});
  FORM.login=async e=>{
   const u=$('#lg-u').value,p=$('#lg-p').value;
   try{const r=await api('login',{username:u,password:p},false);S.token=r.token;S.user=r.user;ls.set('wp-token',r.token);ls.set('wp-user',JSON.stringify(r.user));go('#/app')}
@@ -1294,7 +1201,6 @@ const ACT={
  },
  resetdraft:()=>{if(!confirm('Hapus draf lokal dan mulai ulang formulir?'))return;ls.del('wp-draft');wiz=newDraft();wstep=0;wizErr='';toast('Draf lokal dihapus.');current()},
  do:b=>doAct(b.dataset.a),
- eye:b=>{const i=$('#lg-p');if(!i)return;const s=i.type==='password';i.type=s?'text':'password';b.setAttribute('aria-label',s?'Sembunyikan password':'Tampilkan password')},
  sigpick:()=>{const f=$('#sigfile');if(!f)return;f.value='';f.onchange=async()=>{const m=$('#padmsg');m.textContent='';try{const u=await sigFromImage(f.files[0]);window.__sigPending=u;$('#sigprev').innerHTML=`<div style="margin:10px 0;padding:10px;border:1px dashed #9aa5b1;border-radius:10px;background:#fff"><div class="note" style="margin-bottom:6px">Pratinjau tanda tangan (latar transparan):</div><img id="sigimg" src="${u}" alt="Pratinjau tanda tangan" style="max-width:100%;height:90px"><div class="actions" style="margin-top:8px"><button class="btn primary" data-act="sigsave">Simpan gambar ini</button></div></div>`}catch(e){m.textContent=e.message}};f.click()},
  sigsave:async()=>{const u=window.__sigPending;if(!u)return;try{await api('ttd_save',{ttd:u});S.user.hasTtd=true;ls.set('wp-user',JSON.stringify(S.user));window.__sigPending=null;toast('Tanda tangan disimpan.');pageProfil()}catch(e){$('#padmsg').textContent=e.message}},
  padclear:()=>{const c=$('#pad');c.getContext('2d').clearRect(0,0,c.width,c.height);padDirty=false;$('#padmsg').textContent=''},
