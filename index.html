@@ -1110,10 +1110,33 @@ function pageProfil(){
  pwErr='';const u=S.user,isH=u.role==='HSE';
  draw(()=>{app.innerHTML=`${appTabs('profil')}<div class="who"><div><h2>Profil</h2><p>${esc(u.nama)} · ${isH?'HSE':'Dept. '+esc(u.dept)+(u.plant?' · '+esc(u.plant):'')} · ${esc(u.username)}</p></div></div>
  <div class="panel"><h3 style="margin-bottom:10px">Ganti password</h3>${pwFormHtml(false)}</div>
- ${isH?`<div class="panel"><h3 style="margin-bottom:4px">Tanda tangan HSE</h3><p class="note" style="margin:0 0 10px">Tanda tangan ini dicetak di lembar izin bersama stempel persetujuan saat Anda menyetujui permit. ${u.hasTtd?'Tanda tangan sudah tersimpan; menggambar ulang akan menggantinya.':'Belum ada tanda tangan tersimpan.'} Permit yang sudah disetujui tidak berubah.</p><canvas id="pad" class="pad" width="360" height="120" aria-label="Kotak tanda tangan"></canvas><div class="actions"><button class="btn" data-act="padclear">Hapus coretan</button><button class="btn primary" data-act="padsave">Simpan tanda tangan</button>${u.hasTtd?'<button class="btn bad" data-act="padremove">Hapus tanda tangan tersimpan</button>':''}</div><div id="padmsg" class="note" style="margin-top:8px"></div></div>`:''}`;
+ ${isH?`<div class="panel"><h3 style="margin-bottom:4px">Tanda tangan HSE</h3><p class="note" style="margin:0 0 10px">Tanda tangan ini dicetak di lembar izin bersama stempel persetujuan saat Anda menyetujui permit. ${u.hasTtd?'Tanda tangan sudah tersimpan; menggambar ulang akan menggantinya.':'Belum ada tanda tangan tersimpan.'} Permit yang sudah disetujui tidak berubah.</p><canvas id="pad" class="pad" width="360" height="120" aria-label="Kotak tanda tangan"></canvas><div id="sigprev"></div><div class="actions"><button class="btn" data-act="padclear">Hapus coretan</button><button class="btn primary" data-act="padsave">Simpan tanda tangan</button><button class="btn" data-act="sigpick">Unggah gambar tanda tangan</button><input type="file" id="sigfile" accept="image/png,image/jpeg,image/webp" hidden>${u.hasTtd?'<button class="btn bad" data-act="padremove">Hapus tanda tangan tersimpan</button>':''}</div><div id="padmsg" class="note" style="margin-top:8px"></div></div>`:''}`;
   if(isH)initPad();
  });
 }
+function sigFromImage(file){return new Promise((res,rej)=>{
+ if(!file||!/^image\//.test(file.type))return rej(new Error('Pilih file gambar (PNG atau JPG).'));
+ const im=new Image();const url=URL.createObjectURL(file);
+ im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('Gambar tidak dapat dibaca.'))};
+ im.onload=()=>{URL.revokeObjectURL(url);try{
+  const k=Math.min(1,1400/Math.max(im.width,im.height));const w=Math.max(1,Math.round(im.width*k)),hh=Math.max(1,Math.round(im.height*k));
+  const c=document.createElement('canvas');c.width=w;c.height=hh;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,w,hh);x.drawImage(im,0,0,w,hh);
+  const d=x.getImageData(0,0,w,hh),p=d.data;let x0=w,y0=hh,x1=-1,y1=-1;
+  for(let i=0;i<p.length;i+=4){const m=Math.min(p[i],p[i+1],p[i+2]);let a=m>=235?0:Math.min(255,Math.round((235-m)*255/160));p[i+3]=a;if(a>24){const q=i/4,px=q%w,py=(q-px)/w;if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py}}
+  if(x1<0)return rej(new Error('Tanda tangan tidak terdeteksi pada gambar. Gunakan tinta gelap di latar terang.'));
+  x.putImageData(d,0,0);
+  const cw=x1-x0+1,ch=y1-y0+1;
+  for(const [W,H] of [[360,120],[300,100],[240,80]]){
+   const o=document.createElement('canvas');o.width=W;o.height=H;const ox=o.getContext('2d');const pad=4;const s=Math.min((W-2*pad)/cw,(H-2*pad)/ch);
+   const dw=cw*s,dh=ch*s;ox.imageSmoothingQuality='high';
+   // turunkan bertahap agar garis tipis tidak hilang
+   let src=c,sx=x0,sy=y0,sw=cw,sh=ch;
+   while(sw*0.5>dw){const t=document.createElement('canvas');t.width=Math.ceil(sw/2);t.height=Math.ceil(sh/2);const tx=t.getContext('2d');tx.imageSmoothingQuality='high';tx.drawImage(src,sx,sy,sw,sh,0,0,t.width,t.height);src=t;sx=0;sy=0;sw=t.width;sh=t.height}
+   ox.drawImage(src,sx,sy,sw,sh,(W-dw)/2,(H-dh)/2,dw,dh);
+   const u=o.toDataURL('image/png');if(u.length<=19000)return res(u)}
+  rej(new Error('Gambar terlalu rumit. Gunakan gambar tanda tangan yang lebih sederhana.'))
+ }catch(e){rej(e)}}
+ im.src=url})}
 let padDirty=false;
 function initPad(){
  const c=$('#pad');if(!c)return;const x=c.getContext('2d');x.lineWidth=2.4;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#1a2b6b';padDirty=false;
@@ -1178,6 +1201,8 @@ const ACT={
  },
  resetdraft:()=>{if(!confirm('Hapus draf lokal dan mulai ulang formulir?'))return;ls.del('wp-draft');wiz=newDraft();wstep=0;wizErr='';toast('Draf lokal dihapus.');current()},
  do:b=>doAct(b.dataset.a),
+ sigpick:()=>{const f=$('#sigfile');if(!f)return;f.value='';f.onchange=async()=>{const m=$('#padmsg');m.textContent='';try{const u=await sigFromImage(f.files[0]);window.__sigPending=u;$('#sigprev').innerHTML=`<div style="margin:10px 0;padding:10px;border:1px dashed #9aa5b1;border-radius:10px;background:#fff"><div class="note" style="margin-bottom:6px">Pratinjau tanda tangan (latar transparan):</div><img id="sigimg" src="${u}" alt="Pratinjau tanda tangan" style="max-width:100%;height:90px"><div class="actions" style="margin-top:8px"><button class="btn primary" data-act="sigsave">Simpan gambar ini</button></div></div>`}catch(e){m.textContent=e.message}};f.click()},
+ sigsave:async()=>{const u=window.__sigPending;if(!u)return;try{await api('ttd_save',{ttd:u});S.user.hasTtd=true;ls.set('wp-user',JSON.stringify(S.user));window.__sigPending=null;toast('Tanda tangan disimpan.');pageProfil()}catch(e){$('#padmsg').textContent=e.message}},
  padclear:()=>{const c=$('#pad');c.getContext('2d').clearRect(0,0,c.width,c.height);padDirty=false;$('#padmsg').textContent=''},
  padsave:async()=>{
   const c=$('#pad');if(!padDirty){$('#padmsg').textContent='Gambar tanda tangan terlebih dahulu.';return}
